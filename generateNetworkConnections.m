@@ -1,15 +1,20 @@
-function W=generateNetworkConnections(n)
+function [W,D,A]=generateNetworkConnections(n)
 
+%connectivity matrix
+%connectivity is from ROW to COLUMN!!!!
 
-% W = [ 
-%         0 1 0 0 0;
-%         0 0 1 0 0;
-%         1 0 0 1 0;
-%         0 1 0 0 1;
-%         1 0 1 0 0];
-%       
-      
-W = randi([0 1],n); %random network with degree = 0.5
-W = W - diag(diag(W)); %no autoconnections
+%A=presynapse
+%W=postsynapse
+%D=axonal delay
+
+W=rand(n);
+W(1:n+1:end)=0;
+
+D=rand(n);
+D(1:n+1:end)=0;
+
+A=rand(n)*2-ones(n);
+A(1:n+1:end)=0;
 
 end
+
