@@ -3,7 +3,7 @@ clear all,
 close all,
 
 %define network properties
-n=10; %number of neurons
+n=1000; %number of neurons
 d=0.04; % threshold constant
 Sth=1+d; %thresshold value
 a=1; %time to fire (ttf) constant a
@@ -13,7 +13,7 @@ D=0.05; %decay constant
 t=0; %global time
 tarp=2; % absolute refractory period
 
-maxSimTime=4000;
+maxSimTime=100000;
 
 %build network
 [W,Dlay,A]=generateNetworkConnections(n);
@@ -37,8 +37,11 @@ end
 evlist=sortrows(evlist,3);
 clear new_event
 
-% main iteration
+
+
+%% main iteration
 evlog=[];
+Stotal=[];
 while(~isempty(evlist) && (evlist(1,3)<maxSimTime))
   if(evlist(1,1)==1) %firing spike event
     jneurons=find_connections(evlist(1,2),W);
@@ -100,6 +103,7 @@ while(~isempty(evlist) && (evlist(1,3)<maxSimTime))
   end
   evlog=cat(1,evlog,evlist(1,:));
   evlist(1,:)=[];
+  Stotal=cat(2,Stotal,S(:,1));
 end
 
 
