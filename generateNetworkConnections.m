@@ -9,6 +9,8 @@ function [W,D,A]=generateNetworkConnections(n)
 
 W=rand(n);
 W(1:n+1:end)=0;
+W(W<.1)=0;
+
 
 D=rand(n);
 D(1:n+1:end)=0;
