@@ -1,69 +1,21 @@
+function [S,evlist]=networking(net,evlist)
 
-clear all,
-close all,
+  W=net.W;
+  Dlay=net.Dlay;
+  A=net.A;
+  
+  S=net.S;
+  Sth=net.Sth;
+  a=net.a;
+  b=net.b;
+  v=net.v;
+  D=net.D;
 
-%define network properties
-n=100; %number of neurons
-c=0.04; % threshold constant
-Sth=1+c; %thresshold value
-a=1; %time to fire (ttf) constant 
-b=0; %ttf defines S max.
-v=5; %spike transmission speed (m/s)[mm/ms]
-D=0.3; %decay constant
-t=0; %global time
-tarp=2; % absolute refractory period (arp)[ms]
+  tarp=net.tarp;
 
-maxSimTime=100; % milliseconds
-
-%build network
-[W,Dlay,A]=generateNetworkConnectionsToK(n,40);
-%A=presynapse
-%W=postsynapse
-%Dlay=axonal delay
-
-W=W*2;
-% W=W./max(max(W));
-Dlay=0.0001.*Dlay; %only for testing purposes.
-
-%define states initially
-S=generateNetworkState(n,Sth);
-
-
-%initialize event list
-evlist=[];
-for i=1:n %for every neuron
-  if (S(i,1)>Sth)
-    ttf=(a/(S(i,1)-1))-b;
-    evlist=cat(1,evlist,[1 i t+ttf 0]);  %event type 1 ==> fire
-  end
-end
-inputTimes=linspace(0,maxSimTime,maxSimTime/.5);
-for i=1:n
-  for evI=inputTimes
-    evlist=cat(1,evlist,[2 i evI+i/25 0]);
-  end
-end
-
-evlist=sortrows(evlist,3);
-
-%event types:
-% (1) Fire
-% (2) Burning (input spike)
-% (3) End of refractory state
-%
-% event 2nd item is Neuron number
-% event 3rd item is Global time of event
-% event 4th item is membrane potential to add to neuron state  ONLY DEFINED IN
-% EVENTS OF TYPE 2.
-
-
-%% main iteration
-evlog=[];
-while(~isempty(evlist) && (evlist(1,3)<maxSimTime))
-  fprintf(['\nSimulation time now: ' num2str(evlist(1,3),'%8.4f')]);
   if(evlist(1,1)==1) %firing spike event
     jneurons=find_connections(evlist(1,2),W);
-    for j=1:length(jneurons) %burnin event generator
+    for j=1:length(jneurons) 
       new_event=[2 jneurons(j) ... 
         evlist(1,3)+Dlay(evlist(1,2),jneurons(j))/v ...
         A(evlist(1,2),jneurons(j))*W(evlist(1,2),jneurons(j)) ...
@@ -115,36 +67,10 @@ while(~isempty(evlist) && (evlist(1,3)<maxSimTime))
   elseif(evlist(1,1)==3) %refractory state
     S(evlist(1,2),3)=0; %update refractory flag
   end
-  
-  evlog=cat(1,evlog,evlist(1,:));
-  evlist(1,:)=[];
-  
-  %reorder events
-  evlist=sortrows(evlist,3);  
-  
+
 end
 
 
-%% plot some neuron
-% S_1=Stotal(1,:);
-% for ii=2:length(Stotal)
-%   if(Stotal(ii,2)~=S_1(end,2))
-%     S_1=cat(1,S_1,Stotal(ii,1:2));
-%   end
-% end
-% 
-% plot(S_1(:,2),S_1(:,1))
-% plot(S_1(:,1),S_1(:,2))
 
-%% raster plot
-figure(1),
-for i=1:size(evlog,1)
-  if(evlog(i,1)==1)
-    plot(evlog(i,3),evlog(i,2),'.r');
-    hold on,
-  end
-end
-
-%% 
 
 
